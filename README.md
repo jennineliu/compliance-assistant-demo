@@ -1,11 +1,6 @@
 # compliance-assistant-demo
 An interactive decision support tool that transforms complex international customs regulations into clear, traveler-friendly compliance guidance.
 
-[![Live Demo](https://img.shields.io/badge/Live-Demo-00843D?style=for-the-badge)](https://jennineliu.github.io/border-compliance-assistant/)
-[![HTML](https://img.shields.io/badge/HTML-5-orange?style=for-the-badge)]()
-[![JavaScript](https://img.shields.io/badge/JavaScript-ES6-yellow?style=for-the-badge)]()
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge)]()
-
 ## 🚀 Live Demo
 [Launch Border Compliance Assistant](https://jennineliu.github.io/compliance-assistant-demo/)
 
