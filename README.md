@@ -74,19 +74,6 @@ No backend required.
 
 ---
 
-## Future Enhancements
-
-- Multi-country support
-- AI-powered customs assistant
-- Personalized packing recommendations
-- OCR receipt scanning
-- Luggage inventory builder
-- Dynamic regulation updates
-- Traveler profiles
-- Offline capability
-
----
-
 ## Disclaimer
 
 This application is intended for travel planning purposes only.
