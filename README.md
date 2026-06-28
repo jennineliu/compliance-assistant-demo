@@ -79,7 +79,3 @@ No backend required.
 This application is intended for travel planning purposes only.
 
 Customs officials and government agencies remain the final authority regarding admissibility, declarations, and import regulations. Travelers should always verify current regulations through official government sources before travel.
-
----
-
-Created by J9 Studio
