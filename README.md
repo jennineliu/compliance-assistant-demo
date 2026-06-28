@@ -1,5 +1,10 @@
 # compliance-assistant-demo
 An interactive decision support tool that transforms complex international customs regulations into clear, traveler-friendly compliance guidance.
+
+## 🚀 Live Demo
+
+[Launch Border Compliance Assistant](https://jennineliu.github.io/border-compliance-assistant/)
+
 ## Overview
 
 Border Compliance Assistant helps travelers understand whether items in their luggage are:
