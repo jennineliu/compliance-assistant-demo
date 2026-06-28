@@ -6,7 +6,7 @@ An interactive decision support tool that transforms complex international custo
 
 ## Overview
 
-Border Compliance Assistant helps travelers understand whether items in their luggage are:
+Compliance Assistant helps travelers understand whether items in their luggage are:
 
 - ✅ Allowed
 - ⚠️ Require declaration
