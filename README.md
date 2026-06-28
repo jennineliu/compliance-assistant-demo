@@ -16,6 +16,36 @@ Instead of reading lengthy government regulations, travelers receive clear recom
 
 The current implementation focuses on Brazil and serves as a reusable framework for future country-specific compliance assistants.
 
+## 🖥️ Desktop Experience
+
+### Compliance Assistant Overview
+![Compliance Assistant Overview](screenshots/desktop-border-compliance-assistant.png)
+
+### Customs Registry
+![Customs Registry](screenshots/desktop-customs-registry.png)
+
+### Drone Compliance
+![Drone Compliance](screenshots/desktop-drone-compliance.png)
+
+---
+
+## 📱 Mobile Experience
+
+### Mobile Home Screen
+![Mobile View 1](screenshots/mobile-view1.jpeg)
+
+### Search & Item Lookup
+![Mobile View 2](screenshots/mobile-view2.png)
+
+### Customs Registry
+![Mobile View 3](screenshots/mobile-view3.jpeg)
+
+### Duty Calculator
+![Mobile View 4](screenshots/mobile-view4.png)
+
+### Compliance Checklist
+![Mobile View 5](screenshots/mobile-view5.jpeg)
+
 ---
 
 ## Features
@@ -73,12 +103,6 @@ No backend required.
 - Accessible interaction patterns
 
 ---
-
-# Preview
-
-## Desktop Experience
-
-## Mobile Experience 
 
 ## Disclaimer
 
