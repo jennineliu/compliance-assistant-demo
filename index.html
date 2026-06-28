@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brazil Customs Pro | Traveler Compliance Tool</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- HTML2PDF for offline export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            -webkit-tap-highlight-color: transparent; 
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Brazil inspired elegant gradient: Navy-Green flag concept */
+        .flag-gradient { 
+            background: linear-gradient(135deg, #002244 0%, #004F30 100%); 
+        }
+        .glass-card { 
+            background: rgba(255, 255, 255, 0.96); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.3); 
+        }
+        .watermark { 
+            font-size: 26vw; 
+            line-height: 1; 
+            user-select: none; 
+            pointer-events: none; 
+            z-index: 1; 
+            color: rgba(255, 255, 255, 0.04); 
+            white-space: nowrap; 
+        }
+        @media print { .no-print { display:none !important; } }
+
+        /* Custom Risk & Status Styles matching premium token framework */
+        .status-allowed    { border-color: #6ee7b7; background: #ecfdf5; color: #065f46; }
+        .status-caution    { border-color: #fcd34d; background: #fffbeb; color: #92400e; }
+        .status-prohibited { border-color: #fca5a5; background: #fef2f2; color: #991b1b; }
+        
+        .risk-low     { background: #dcfce7; color: #166534; }
+        .risk-medium  { background: #fef9c3; color: #854d0e; }
+        .risk-high    { background: #fee2e2; color: #991b1b; }
+        .risk-extreme { background: #1e1b4b; color: #e0e7ff; }
+
+        .card-extreme { border-color: #fca5a5 !important; background: #fff5f5; }
+        .card-high    { border-color: #fecaca !important; background: #fff8f8; }
+
+        /* Custom Checkbox */
+        .item-checkbox { 
+            width: 22px; 
+            height: 22px; 
+            border-radius: 6px; 
+            border: 2px solid #cbd5e1; 
+            cursor: pointer; 
+            flex-shrink: 0; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            transition: all 0.2s; 
+        }
+        .item-checkbox.checked { 
+            background: #00843D; 
+            border-color: #00843D; 
+        }
+
+        /* Sticky Bottom Mobile Bar */
+        #summaryBar { transition: transform 0.3s ease, opacity 0.3s ease; }
+        #summaryBar.hidden-bar { transform: translateY(100%); opacity: 0; pointer-events: none; }
+
+        /* Elegant Visible Category Scrollbar styles (Cross-browser supported) */
+        #categoryFilterContainer {
+            scrollbar-width: thin;
+            scrollbar-color: #86efac #f1f5f9;
+        }
+        #categoryFilterContainer::-webkit-scrollbar { 
+            height: 6px; 
+        }
+        #categoryFilterContainer::-webkit-scrollbar-track { 
+            background: #f1f5f9; 
+            border-radius: 999px; 
+        }
+        #categoryFilterContainer::-webkit-scrollbar-thumb { 
+            background: #86efac; 
+            border-radius: 999px; 
+        }
+        #categoryFilterContainer::-webkit-scrollbar-thumb:hover { 
+            background: #00843D; 
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900 selection:bg-green-100 pb-28 md:pb-12">
+
+<!-- Premium Header -->
+<header class="relative overflow-hidden flag-gradient text-white pt-10 pb-20 md:pt-20 md:pb-36 px-4 shadow-2xl no-print">
+    <!-- Traditional watermark -->
+    <div class="absolute inset-0 flex items-center justify-center translate-x-1/4 watermark font-black tracking-tighter uppercase">BRASIL</div>
+    
+    <div class="max-w-6xl mx-auto relative z-10">
+        <div class="flex flex-col gap-5">
+            <!-- Official Link Badge -->
+            <a href="https://www.gov.br/receitafederal/pt-br" target="_blank"
+               class="inline-flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full w-fit border border-white/20 hover:bg-white/20 transition-all group">
+                <span class="text-xl">🇧🇷</span>
+                <span class="text-xs font-bold tracking-widest uppercase opacity-90">Receita Federal Traveler Portal</span>
+                <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-opacity"></i>
+            </a>
+            
+            <div class="space-y-3">
+                <h1 class="text-3xl sm:text-5xl md:text-6xl font-black tracking-tighter leading-tight">
+                    Brazil Customs<br><span class="text-yellow-400">Compliance & Duty Guide</span>
+                </h1>
+                <p class="text-sm md:text-lg text-slate-200 max-w-2xl font-medium leading-relaxed opacity-90">
+                    Interactive travelers' assistant for Receita Federal, ANVISA, and VIGIAGRO entry regulations. Review baggage limits, declaration triggers, and restricted items before arrival.
+                </p>
+                <div class="flex flex-wrap gap-x-6 gap-y-1.5 pt-2 text-xs font-semibold text-emerald-300">
+                    <span class="flex items-center gap-1"><i data-lucide="clock" class="w-4 h-4"></i> Source Check: June 2026</span>
+                    <span class="flex items-center gap-1"><i data-lucide="shield-check" class="w-4 h-4"></i> Law 14.286/2021 Active</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-4 -mt-12 md:-mt-20 mb-8 relative z-20">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <!-- Left Column: Registry & Search -->
+        <div class="lg:col-span-8 space-y-6">
+
+            <!-- Search and Filter Panel -->
+            <div class="glass-card p-4 md:p-6 rounded-[2rem] shadow-xl shadow-green-950/10 border border-white no-print">
+                <div class="flex flex-col gap-4">
+                    <div class="relative">
+                        <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none transition-colors" id="searchIcon"></i>
+                        <input type="text" id="searchInput" placeholder="Search items (e.g. laptop, cheese, insulin, vape)..."
+                               class="w-full pl-12 pr-12 py-4 bg-slate-100 rounded-2xl border-2 border-transparent focus:bg-white focus:border-emerald-500 outline-none transition-all font-semibold text-slate-700 placeholder:text-slate-400"
+                               oninput="handleSearchInput()"
+                               onfocus="showDropdown()"
+                               autocomplete="off">
+                        
+                        <!-- Toggle Dropdown Button -->
+                        <button onclick="toggleDropdown(event)" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 focus:outline-none transition-colors">
+                            <i data-lucide="chevron-down" id="dropdownArrow" class="w-5 h-5 transition-transform duration-200"></i>
+                        </button>
+
+                        <!-- Suggestions Dropdown Menu Container -->
+                        <div id="searchDropdown" class="hidden absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl border border-slate-200 shadow-2xl max-h-60 overflow-y-auto z-50 divide-y divide-slate-100 transition-all">
+                            <!-- Populated via Javascript -->
+                        </div>
+                    </div>
+                    
+                    <!-- Horizontal Pill categories with navigation arrow triggers -->
+                    <div class="relative flex items-center">
+                        <button onclick="scrollCategories(-1)"
+                                class="absolute left-0 z-10 p-1.5 bg-white hover:bg-slate-50 rounded-full shadow-md border border-slate-100 transition-all">
+                            <i data-lucide="chevron-left" class="w-4 h-4 text-slate-600"></i>
+                        </button>
+                        <!-- Container with customized, visible scrollbar -->
+                        <div class="flex gap-2 overflow-x-auto scroll-smooth px-8 pb-3 w-full" id="categoryFilterContainer"></div>
+                        <button onclick="scrollCategories(1)"
+                                class="absolute right-0 z-10 p-1.5 bg-white hover:bg-slate-50 rounded-full shadow-md border border-slate-100 transition-all">
+                            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-600"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vaping Ban Notice Box -->
+            <section class="bg-red-50 p-6 rounded-[2.5rem] border-2 border-red-200 shadow-lg flex gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-red-600 text-white flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="ban" class="w-6 h-6"></i>
+                </div>
+                <div class="space-y-1">
+                    <span class="text-red-800 text-[10px] font-black uppercase tracking-wider">Critical Advisory</span>
+                    <h3 class="font-black text-red-950 text-base leading-tight">Electronic Cigarettes & Vapes Restricted</h3>
+                    <p class="text-xs text-red-700 leading-relaxed font-medium">
+                        ANVISA prohibits the importation, sale, advertising, and distribution of electronic smoking devices in Brazil. Travelers should not bring vapes, pods, refills, or e-liquids, because border authorities may retain products subject to ANVISA control even though ANVISA FAQ language distinguishes personal possession from commercial activity.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Items Registry Main Section (Moved up directly under search) -->
+            <section id="registry-capture-area" class="bg-white p-5 md:p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100">
+                <div class="flex flex-wrap items-center justify-between mb-6 gap-3">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="clipboard-list" class="w-6 h-6 text-emerald-600"></i>
+                        <h3 class="font-black text-slate-900 uppercase text-sm tracking-widest">Customs Registry</h3>
+                    </div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <button onclick="clearChecked()" id="clearBtn" class="no-print hidden items-center gap-1.5 px-3 py-2 bg-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-200 transition-all">
+                            <i data-lucide="x" class="w-3 h-3"></i> Clear Checked
+                        </button>
+                        <button onclick="exportPDF()" class="no-print flex items-center gap-1.5 px-4 py-2 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-800 transition-all shadow-lg shadow-slate-200">
+                            <i data-lucide="file-down" class="w-3.5 h-3.5"></i> Export PDF
+                        </button>
+                        <span id="resultCount" class="text-xs font-black text-emerald-700 bg-emerald-50 px-4 py-2 rounded-full border border-emerald-100">0 Items</span>
+                    </div>
+                </div>
+
+                <div id="itemList" class="grid grid-cols-1 gap-4"></div>
+                
+                <div id="emptyState" class="hidden py-16 text-center space-y-4 no-print">
+                    <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto">
+                        <i data-lucide="info" class="w-8 h-8 text-slate-300"></i>
+                    </div>
+                    <p class="text-slate-400 font-bold">No items matching criteria found.</p>
+                    <button onclick="clearFilters()" class="text-emerald-600 font-black text-xs uppercase tracking-widest hover:underline">Reset Filters</button>
+                </div>
+            </section>
+
+            <!-- Drone Entry Guidance Panel -->
+            <section class="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-800">
+                        <i data-lucide="plane" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-slate-900 uppercase text-sm tracking-widest">Drone / Unmanned Aircraft Compliance</h3>
+                        <p class="text-[10px] text-slate-400 font-bold mt-0.5">Mandatory protocols for entering Brazilian airspace</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Registration Requirements -->
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                        <p class="text-[11px] font-black text-slate-800 uppercase tracking-wider flex items-center gap-2 mb-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> ANAC Registration (SISANT)
+                        </p>
+                        <ul class="space-y-1.5 text-[11px] text-slate-600 font-semibold leading-relaxed">
+                            <li>• Model aircraft heavier than <strong class="text-slate-800">250g</strong> must be registered or inscribed with ANAC.</li>
+                            <li>• Recreational and non-recreational flights follow different ANAC requirements.</li>
+                            <li>• RETA third-party liability insurance is required for <strong class="text-slate-800">non-recreational</strong> aircraft above 250g.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Frequencies & Flight Permission -->
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                        <p class="text-[11px] font-black text-slate-800 uppercase tracking-wider flex items-center gap-2 mb-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-yellow-500"></span> ANATEL & DECEA
+                        </p>
+                        <ul class="space-y-1.5 text-[11px] text-slate-600 font-semibold leading-relaxed">
+                            <li>• Radio transmitters must comply with <strong class="text-slate-800">ANATEL</strong> frequency guidelines.</li>
+                            <li>• Check DECEA airspace access rules in <strong class="text-slate-800">SARPAS</strong> before flying; authorization depends on the area and operation.</li>
+                            <li>• Flights above <strong class="text-slate-800">120 meters (400 ft)</strong> generally require additional licensing or authorization.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Right Column: Sidebar Panels -->
+        <aside class="lg:col-span-4 space-y-6 no-print">
+
+            <!-- Quota and Exemption Limits Tool -->
+            <section class="glass-card rounded-[2.5rem] shadow-2xl shadow-emerald-950/5 overflow-hidden border border-white">
+                <div class="bg-slate-900 p-5 flex justify-between items-center text-white">
+                    <h3 class="font-black uppercase text-xs tracking-widest">Official Allowances</h3>
+                    <div class="flex bg-white/10 rounded-lg p-0.5">
+                        <button id="btn-air" onclick="setArrivalType('air')" class="px-2.5 py-1 text-[10px] font-black rounded bg-white text-slate-900 transition-all">Air/Sea</button>
+                        <button id="btn-land" onclick="setArrivalType('land')" class="px-2.5 py-1 text-[10px] font-black rounded text-white transition-all">Land/River</button>
+                    </div>
+                </div>
+
+                <div class="p-5 space-y-5">
+                    <div class="text-center">
+                        <div id="baggageQuotaText" class="text-5xl font-black text-emerald-600 tracking-tighter">US$ 1,000</div>
+                        <div class="text-[10px] text-slate-400 uppercase font-black tracking-[0.15em] mt-2">Baggage Duty-Free Exemption</div>
+                    </div>
+                    <div class="h-px bg-slate-100"></div>
+
+                    <div class="text-center">
+                        <div id="freeshopQuotaText" class="text-4xl font-black text-yellow-500 tracking-tighter">US$ 1,000</div>
+                        <div class="text-[10px] text-slate-400 uppercase font-black tracking-[0.15em] mt-2">Arrival Airport Free Shop Quota</div>
+                        <p class="text-[9px] text-slate-400 mt-1 italic">Additional quota applies at the first landing airport in Brazil. It is not the same as the standard baggage quota.</p>
+                    </div>
+
+                    <div class="h-px bg-slate-100"></div>
+                    
+                    <div class="space-y-2.5 text-[11px] font-semibold text-slate-600">
+                        <div class="flex justify-between"><span>Liquor & Spirits</span><span class="font-black text-slate-900">12 Liters total</span></div>
+                        <div class="flex justify-between"><span>Cigarettes</span><span class="font-black text-slate-900">200 units (10 packs)</span></div>
+                        <div class="flex justify-between"><span>Cigars & Cigarillos</span><span class="font-black text-slate-900">25 units</span></div>
+                        <div class="flex justify-between"><span>Loose Tobacco</span><span class="font-black text-slate-900">250g</span></div>
+                        <div class="flex justify-between"><span>Personal Cash</span><span class="font-black text-slate-900">Declare if &gt; USD 10k equiv.</span></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tax and Penalty Estimator Tool -->
+            <section class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden">
+                <div class="p-5 bg-emerald-50 border-b border-emerald-100 flex items-center justify-between">
+                    <h3 class="font-black text-slate-900 uppercase text-xs tracking-widest flex items-center gap-1.5">
+                        <i data-lucide="calculator" class="w-4 h-4 text-emerald-700"></i> Tax & Penalty Estimator
+                    </h3>
+                    <span class="text-[9px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">50% flat tax</span>
+                </div>
+                <div class="p-5 space-y-4">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Value of Goods (USD)</label>
+                        <div class="relative">
+                            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 font-black text-slate-400">$</span>
+                            <input type="number" id="calcValue" value="1200" oninput="calculateImportTax()"
+                                   class="w-full pl-8 pr-4 py-2.5 bg-slate-100 rounded-xl border border-transparent font-black text-slate-800 outline-none focus:bg-white focus:border-emerald-500">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3 pt-2">
+                        <div class="p-3 bg-slate-50 rounded-xl">
+                            <p class="text-[9px] font-bold text-slate-400 uppercase">Duty (If Declared)</p>
+                            <p id="declaredTax" class="text-xl font-black text-slate-800">$100.00</p>
+                        </div>
+                        <div class="p-3 bg-red-50 rounded-xl">
+                            <p class="text-[9px] font-bold text-red-500 uppercase">Total Due If Undeclared</p>
+                            <p id="penaltyTax" class="text-xl font-black text-red-700">$200.00</p>
+                        </div>
+                    </div>
+                    <p class="text-[9px] text-slate-400 leading-relaxed italic mt-1">
+                        *Exempt personal goods such as one used phone, one used watch, and clothing are excluded from this simplified estimate. Receita Federal guidance says a false "Nothing to Declare" choice can trigger a fine corresponding to 50% of the value exceeding the exemption limit.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Mandatory Declaration - What to declare? -->
+            <section class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden">
+                <div class="p-5 border-b border-slate-100">
+                    <h3 class="font-black text-slate-900 uppercase text-xs tracking-widest">e-DBV Declaration Gateway</h3>
+                </div>
+                <div class="p-5 space-y-4 text-[12px] text-slate-600 leading-relaxed">
+                    <p>Travelers must submit the Electronic Traveler's Goods Declaration (e-DBV) if carrying:</p>
+                    <div class="space-y-2 font-semibold">
+                        <div class="flex items-start gap-2.5 p-2 bg-slate-50 rounded-xl">
+                            <i data-lucide="circle-alert" class="w-4 h-4 text-emerald-600 mt-0.5"></i>
+                            <p class="text-slate-700">Cash above USD 10,000 (or equivalent foreign currency).</p>
+                        </div>
+                        <div class="flex items-start gap-2.5 p-2 bg-slate-50 rounded-xl">
+                            <i data-lucide="circle-alert" class="w-4 h-4 text-emerald-600 mt-0.5"></i>
+                            <p class="text-slate-700">Taxable purchase goods exceeding the quota limit ($1,000 / $500).</p>
+                        </div>
+                        <div class="flex items-start gap-2.5 p-2 bg-slate-50 rounded-xl">
+                            <i data-lucide="circle-alert" class="w-4 h-4 text-emerald-600 mt-0.5"></i>
+                            <p class="text-slate-700">Items under sanitary, agricultural, Army, or other-agency control.</p>
+                        </div>
+                    </div>
+                    <a href="https://www.edbv.receita.fazenda.gov.br" target="_blank"
+                       class="w-full inline-flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-700 transition-colors text-white text-xs font-black uppercase tracking-widest rounded-xl">
+                        Official e-DBV Portal <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Pre-Flight Tasks Checklist -->
+            <section class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden">
+                <div class="p-5 border-b border-slate-100">
+                    <h3 class="font-black text-slate-900 uppercase text-xs tracking-widest">Pre-Flight Checklist</h3>
+                </div>
+                <div id="checklistContainer" class="divide-y divide-slate-100">
+                    <div class="p-4 flex gap-3 items-start cursor-pointer group" onclick="toggleTask(this)">
+                        <span class="w-5 h-5 rounded border-2 border-slate-200 group-hover:border-emerald-500 flex items-center justify-center flex-shrink-0 transition-colors"><i data-lucide="check" class="w-3.5 h-3.5 text-white stroke-[4] hidden"></i></span>
+                        <div><p class="text-xs font-black text-slate-800">Review Cash Limits</p><p class="text-[10px] text-slate-500 mt-0.5">Ensure physical cash held is declared on e-DBV if &gt;$10k.</p></div>
+                    </div>
+                    <div class="p-4 flex gap-3 items-start cursor-pointer group" onclick="toggleTask(this)">
+                        <span class="w-5 h-5 rounded border-2 border-slate-200 group-hover:border-emerald-500 flex items-center justify-center flex-shrink-0 transition-colors"><i data-lucide="check" class="w-3.5 h-3.5 text-white stroke-[4] hidden"></i></span>
+                        <div><p class="text-xs font-black text-slate-800">Check Anvisa Vaping Ban</p><p class="text-[10px] text-slate-500 mt-0.5">Leave all e-cigarettes and vape mods at home.</p></div>
+                    </div>
+                    <div class="p-4 flex gap-3 items-start cursor-pointer group" onclick="toggleTask(this)">
+                        <span class="w-5 h-5 rounded border-2 border-slate-200 group-hover:border-emerald-500 flex items-center justify-center flex-shrink-0 transition-colors"><i data-lucide="check" class="w-3.5 h-3.5 text-white stroke-[4] hidden"></i></span>
+                        <div><p class="text-xs font-black text-slate-800">Pack Original Prescriptions</p><p class="text-[10px] text-slate-500 mt-0.5">Keep medications in original packaging with prescriptions or other medical documentation in your name.</p></div>
+                    </div>
+                    <div class="p-4 flex gap-3 items-start cursor-pointer group" onclick="toggleTask(this)">
+                        <span class="w-5 h-5 rounded border-2 border-slate-200 group-hover:border-emerald-500 flex items-center justify-center flex-shrink-0 transition-colors"><i data-lucide="check" class="w-3.5 h-3.5 text-white stroke-[4] hidden"></i></span>
+                        <div><p class="text-xs font-black text-slate-800">Verify Agricultural Foods</p><p class="text-[10px] text-slate-500 mt-0.5">Check the current MAPA / VIGIAGRO baggage list before carrying foods, seeds, or other animal and plant products.</p></div>
+                    </div>
+                </div>
+                <div class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Boarding Progress</span>
+                    <span id="taskProgress" class="text-xs font-black text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full border border-emerald-200">0 / 4</span>
+                </div>
+            </section>
+        </aside>
+    </div>
+</main>
+
+<!-- Footer with standard disclaimer details -->
+<footer class="bg-slate-900 text-white py-16 px-6 no-print">
+    <div class="max-w-4xl mx-auto text-center space-y-8">
+        <div class="space-y-4">
+            <div class="inline-flex items-center gap-2 opacity-50">
+                <div class="h-px w-8 bg-white"></div>
+                <span class="text-[10px] font-black uppercase tracking-[0.3em]">Official Regulation Data</span>
+                <div class="h-px w-8 bg-white"></div>
+            </div>
+            <p class="text-[11px] font-black uppercase tracking-widest text-emerald-400">Sources: Receita Federal, Ministry of Agriculture (MAPA / VIGIAGRO), ANVISA</p>
+        </div>
+        <p class="text-xs text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed">
+            Disclaimer: This compliance helper is designed for travel planning purposes only. Customs and sanitary officials have final authority on all import exemptions and clearance operations. Check the latest Receita Federal, ANVISA, and MAPA rules before travel.
+        </p>
+        <div class="pt-8 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4">
+            <span class="text-[9px] font-black uppercase tracking-widest text-slate-500">Created by J9 Studio for demonstration purposes only.</span>
+            <a href="https://www.gov.br/receitafederal/pt-br" target="_blank" class="flex items-center gap-2 text-emerald-400 font-black text-[10px] uppercase tracking-widest hover:text-emerald-300">
+                Official Government Portal <i data-lucide="external-link" class="w-3 h-3"></i>
+            </a>
+        </div>
+    </div>
+</footer>
+
+<!-- Mobile Bottom Sticky bar for compliance tracking -->
+<div id="summaryBar" class="hidden-bar fixed bottom-0 left-0 right-0 z-50 no-print md:hidden">
+    <div class="mx-4 mb-4 rounded-2xl shadow-2xl overflow-hidden border border-white/20">
+        <div class="bg-slate-900 px-4 py-3 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 flex-1 min-w-0">
+                <div id="barIcon" class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 bg-emerald-500 text-white">
+                    <i data-lucide="check" class="w-4 h-4"></i>
+                </div>
+                <div class="min-w-0 text-left">
+                    <p id="barTitle" class="text-white font-black text-xs truncate">My Packing List</p>
+                    <p id="barSub" class="text-slate-400 text-[10px] truncate">No items declared</p>
+                </div>
+            </div>
+            <button onclick="showMobileSummary()" class="flex-shrink-0 px-3 py-2 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl">
+                View Checklist
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Drawer Modal -->
+<div id="mobileModal" class="fixed inset-0 z-[100] hidden no-print">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeMobileModal()"></div>
+    <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-[2.5rem] max-h-[85vh] flex flex-col shadow-2xl">
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+            <h3 class="font-black text-slate-900 uppercase text-sm tracking-widest">My Checked Items</h3>
+            <button onclick="closeMobileModal()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
+                <i data-lucide="x" class="w-4 h-4 text-slate-600"></i>
+            </button>
+        </div>
+        
+        <div id="modalRiskSummary" class="px-5 pt-4 grid grid-cols-3 gap-2"></div>
+        <div id="modalList" class="overflow-y-auto p-5 space-y-3 flex-1"></div>
+        
+        <div class="p-5 border-t border-slate-100">
+            <button onclick="clearChecked(); closeMobileModal();" class="w-full py-3 rounded-2xl bg-slate-100 text-slate-700 text-xs font-black uppercase tracking-widest">Clear All Selections</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const rawData = [
+    { id:1,  category:"Tech",       name:"Laptops & Notebooks",        examples:"MacBook, ThinkPad, Dell XPS",                                                 status:"Caution",    notes:"Allowed but NOT exempt as personal items. Brand new devices count directly towards the $1,000 duty-free baggage allowance. Used ones are evaluated by customs based on signs of wear.", risk:"Medium",  action:"Declare if brand-new & combined value > $1,000." },
+    { id:2,  category:"Tech",       name:"Smartphones",                examples:"iPhone, Samsung Galaxy, Pixel",                                              status:"Allowed",    notes:"Exempt as a personal item: strictly 1 mobile phone per traveler. Must be unboxed and activated. Extra devices in boxes count towards the $1,000 limit.", risk:"Low",     action:"No declaration needed for 1 personal used phone." },
+    { id:3,  category:"Tech",       name:"Cameras",                    examples:"DSLR, Mirrorless, GoPro (excludes video cameras)",                             status:"Allowed",    notes:"Exempt as a personal item: strictly 1 photographic camera per traveler. Must be unboxed & used. Standard camcorders or professional rigs do NOT qualify.", risk:"Low",     action:"No declaration needed for 1 used camera." },
+    { id:4,  category:"Tech",       name:"Watches & Smartwatches",     examples:"Apple Watch, Rolex, Garmin",                                                  status:"Allowed",    notes:"Exempt as a personal item: strictly 1 watch worn on the wrist. Extra watches in bags are counted towards the $1,000 duty-free quota.", risk:"Low",     action:"Wear on your wrist. Declare excess units." },
+    { id:5,  category:"Meds",       name:"Prescription Drugs",         examples:"Blood pressure pills, routine medication, birth control",                      status:"Allowed",    notes:"Medicines for personal use are generally allowed in accompanied baggage when quantities match the trip and the product is not prohibited in Brazil.", risk:"Low",     action:"Carry in original packaging with your prescription." },
+    { id:6,  category:"Meds",       name:"Controlled Medicines",       examples:"ADHD stimulants, strong sedatives, psychotropic drugs",                       status:"Caution",    notes:"Medicines under special control may need closer review by ANVISA and should travel with prescription and supporting medical documents.", risk:"High",    action:"Declare if questioned and carry medical documentation." },
+    { id:7,  category:"Meds",       name:"CBD / Medical Cannabis",     examples:"CBD tinctures, cannabis therapy oils",                                         status:"Caution",    notes:"Cannabis-derived products can require ANVISA authorization or other prior clearance depending on product type and status in Brazil.", risk:"High",    action:"Check ANVISA requirements before travel and declare if carried." },
+    { id:8,  category:"Vaping",     name:"E-Cigarettes & Vapes",       examples:"Vape mods, disposable pods, e-liquids, juices",                                status:"Caution",    notes:"ANVISA prohibits importation, sale, advertising, and distribution of electronic smoking devices. Travelers should not bring them because border retention is possible.", risk:"Extreme", action:"Do not bring." },
+    { id:9,  category:"Money",      name:"Cash & Currency",            examples:"USD cash, Euros, Brazilian Reais",                                            status:"Caution",    notes:"Amounts exceeding USD 10,000 or the equivalent in another currency must be declared in e-DBV upon entry or exit.", risk:"High",    action:"Submit e-DBV if carrying over the threshold." },
+    { id:10, category:"Food",       name:"Cured Meat & Sausages",      examples:"Salami, cured ham, prosciutto, vacuum pork",                                  status:"Caution",    notes:"Some industrialized meat products may be permitted if they meet current MAPA / VIGIAGRO conditions, while others remain prohibited.", risk:"Medium",  action:"Check the latest MAPA baggage list and declare if carried." },
+    { id:11, category:"Food",       name:"Cured Cheese & Dairy",       examples:"Sealed aged parmesan, hard cheeses, butter",                                   status:"Caution",    notes:"Dairy entry depends on the exact product and whether current MAPA packaging and origin requirements are met.", risk:"Medium",  action:"Check the latest MAPA baggage list and declare if carried." },
+    { id:12, category:"Food",       name:"Fresh Produce",              examples:"Apples, oranges, leafy vegetables, seeds",                                    status:"Prohibited", notes:"Fresh fruit, vegetables, plants, and seeds are tightly controlled and normally require phytosanitary documentation or prior authorization.", risk:"High",    action:"Do not bring unless you have the required documents." },
+    { id:13, category:"Food",       name:"Honey & Bee Products",       examples:"Raw honey, propolis spray, bee royal jelly",                                  status:"Prohibited", notes:"VIGIAGRO biosecurity rules. Raw bee-derived products are completely prohibited in traveler bags due to infectious bee disease hazards.", risk:"High",    action:"Leave at home. Will be confiscated." },
+    { id:14, category:"Food",       name:"Coffee & Tea",               examples:"Sealed roasted ground coffee, coffee beans, tea leaves",                       status:"Allowed",    notes:"Permitted in reasonable amounts for personal use, provided they are commercially roasted, packaged, and vacuum-sealed.", risk:"Low",     action:"Pack in luggage. Green Channel." },
+    { id:15, category:"Alcohol",    name:"Spirits & Wine",             examples:"Whisky bottles, red wine, vodka, gin",                                        status:"Caution",    notes:"The baggage quantity limit is 12 liters total. If you exceed the quantitative limit, the simplified baggage tax treatment no longer applies.", risk:"Medium",  action:"Stay within 12 liters or expect common-import treatment." },
+    { id:16, category:"Tobacco",    name:"Cigarettes & Cigars",        examples:"Foreign-made cigarette packs, Cuban cigars, tobacco tins",                    status:"Caution",    notes:"Duty-free: 200 cigarettes (10 packs), 25 cigars, or 250g of tobacco. Excessive amounts are taxable. Must be 18+ to import.", risk:"Medium",  action:"Declare excess quantities at Red Channel." },
+    { id:17, category:"Drones",     name:"Drones / UAVs",              examples:"DJI Phantom, DJI Mavic, FPV quadcopters",                                     status:"Caution",    notes:"Aircraft above 250g may require ANAC registration, and operations must also respect DECEA airspace and ANATEL radio rules.", risk:"High",    action:"Check ANAC, DECEA, and ANATEL rules before flying." },
+    { id:19, category:"Tech",       name:"iPads & Tablets",            examples:"iPad Pro, Samsung Galaxy Tab",                                                status:"Caution",    notes:"Tablets do NOT qualify for the 'personal use item' exemption. They count directly towards the $1,000 duty-free baggage allowance.", risk:"Medium",  action:"Declare if cumulative baggage value exceeds $1,000." },
+    { id:20, category:"Food",       name:"Olive Oil & Condiments",     examples:"Olive oil bottles, sealed dry herbs, packaged salt",                          status:"Allowed",    notes:"Allowed if industrially processed and sealed in original manufacturer bottles with clear labeling.", risk:"Low",     action:"Pack safely in checked bags." },
+    { id:21, category:"Tech",       name:"Game Consoles",              examples:"PlayStation 5, Nintendo Switch, Xbox Series X",                               status:"Caution",    notes:"Consoles are NOT exempt personal items. New sealed devices count directly against the US$ 1,000 quota.", risk:"Medium",  action:"Declare if combined electronics exceed $1,000." },
+    { id:22, category:"Prohibited", name:"Imitation / Toy Firearms",   examples:"Replica pistols, airsoft guns, toy weapons",                                  status:"Prohibited", notes:"Replica or imitation firearms are restricted items under Brazilian law and should not be packed as ordinary baggage.", risk:"High",    action:"Do not bring." }
+];
+
+let state = { search:'', category:'All', arrivalType:'air' };
+let checked = new Set();
+let searchTimer = null;
+
+const baggageLimits = { air: 1000, land: 500 };
+const freeshopLimits = { air: 1000, land: null };
+
+function init() {
+    renderCategories();
+    renderList();
+    renderLimits();
+    calculateImportTax();
+    populateDropdown();
+    
+    // Global listener to close dropdown on click outside
+    document.addEventListener('click', function(e) {
+        const searchInput = document.getElementById('searchInput');
+        const dropdown = document.getElementById('searchDropdown');
+        if (searchInput && dropdown && !searchInput.contains(e.target) && !e.target.closest('#searchDropdown') && !e.target.closest('button')) {
+            hideDropdown();
+        }
+    });
+    
+    lucide.createIcons();
+}
+
+function handleSearchInput() {
+    debounceSearch();
+    showDropdown();
+}
+
+function debounceSearch() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => { 
+        state.search = document.getElementById('searchInput').value.toLowerCase(); 
+        renderList(); 
+        populateDropdown();
+    }, 220);
+}
+
+function showDropdown() {
+    const dropdown = document.getElementById('searchDropdown');
+    dropdown.classList.remove('hidden');
+    document.getElementById('dropdownArrow').classList.add('rotate-180');
+    document.getElementById('searchIcon').classList.add('text-emerald-600');
+    populateDropdown();
+}
+
+function hideDropdown() {
+    const dropdown = document.getElementById('searchDropdown');
+    dropdown.classList.add('hidden');
+    document.getElementById('dropdownArrow').classList.remove('rotate-180');
+    document.getElementById('searchIcon').classList.remove('text-emerald-600');
+}
+
+function toggleDropdown(event) {
+    event.stopPropagation();
+    const dropdown = document.getElementById('searchDropdown');
+    if (dropdown.classList.contains('hidden')) {
+        showDropdown();
+        document.getElementById('searchInput').focus();
+    } else {
+        hideDropdown();
+    }
+}
+
+function populateDropdown() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const dropdown = document.getElementById('searchDropdown');
+    
+    // Filter dropdown suggestions by current input and selected category pill
+    const filtered = rawData.filter(item => {
+        const matchQ = !q || item.name.toLowerCase().includes(q) || item.examples.toLowerCase().includes(q);
+        const matchC = state.category === 'All' || item.category === state.category;
+        return matchQ && matchC;
+    });
+
+    if (filtered.length === 0) {
+        dropdown.innerHTML = `
+            <div class="px-4 py-3.5 text-xs text-slate-400 font-semibold text-center italic">
+                No matching items found
+            </div>`;
+        return;
+    }
+
+    dropdown.innerHTML = filtered.map(item => {
+        let statusIndicator = 'bg-emerald-500';
+        if (item.status === 'Caution') statusIndicator = 'bg-amber-500';
+        if (item.status === 'Prohibited') statusIndicator = 'bg-red-500';
+
+        return `
+            <div onclick="selectDropdownItem('${item.name}')" 
+                 class="px-4 py-3 hover:bg-emerald-50/50 cursor-pointer flex items-center justify-between text-sm font-semibold text-slate-700 transition-all">
+                <div class="flex items-center gap-2 min-w-0">
+                    <span class="w-2.5 h-2.5 rounded-full ${statusIndicator} flex-shrink-0"></span>
+                    <span class="truncate">${item.name}</span>
+                </div>
+                <span class="text-[9px] text-slate-400 bg-slate-50 border border-slate-100 px-2.5 py-0.5 rounded-full uppercase tracking-wider font-extrabold flex-shrink-0">${item.category}</span>
+            </div>`;
+    }).join('');
+}
+
+function selectDropdownItem(name) {
+    const input = document.getElementById('searchInput');
+    input.value = name;
+    state.search = name.toLowerCase();
+    renderList();
+    hideDropdown();
+}
+
+function renderCategories() {
+    const cats = ['All', ...new Set(rawData.map(i => i.category))];
+    document.getElementById('categoryFilterContainer').innerHTML = cats.map(c => `
+        <button onclick="setCategory('${c}')"
+                class="px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border-2 ${state.category===c?'bg-emerald-700 text-white border-emerald-700 shadow-lg shadow-emerald-200':'bg-slate-100 text-slate-500 border-transparent hover:bg-slate-200'}">
+            ${c}
+        </button>`).join('');
+}
+
+function setCategory(c) { 
+    state.category = c; 
+    renderCategories(); 
+    renderList(); 
+    populateDropdown();
+}
+
+function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    state.search = ''; 
+    state.category = 'All';
+    renderCategories(); 
+    renderList();
+    populateDropdown();
+}
+
+function scrollCategories(dir) {
+    document.getElementById('categoryFilterContainer').scrollBy({ left: dir * 180, behavior: 'smooth' });
+}
+
+function toggleCheck(id) {
+    checked.has(id) ? checked.delete(id) : checked.add(id);
+    
+    // Update individual checkboxes immediately without heavy redraws
+    const box = document.getElementById(`chk-${id}`);
+    const icon = document.getElementById(`chk-icon-${id}`);
+    if (box) box.classList.toggle('checked', checked.has(id));
+    if (icon) icon.style.display = checked.has(id) ? 'block' : 'none';
+    
+    updateSummaryBar();
+    const clearBtn = document.getElementById('clearBtn');
+    if (clearBtn) clearBtn.classList.toggle('hidden', checked.size === 0);
+}
+
+function clearChecked() {
+    checked.clear();
+    document.querySelectorAll('.item-checkbox').forEach(b => b.classList.remove('checked'));
+    document.querySelectorAll('[id^="chk-icon-"]').forEach(i => i.style.display = 'none');
+    updateSummaryBar();
+    const clearBtn = document.getElementById('clearBtn');
+    if (clearBtn) clearBtn.classList.add('hidden');
+}
+
+function updateSummaryBar() {
+    const bar = document.getElementById('summaryBar');
+    if (!bar) return;
+    if (checked.size === 0) { 
+        bar.classList.add('hidden-bar'); 
+        return; 
+    }
+    bar.classList.remove('hidden-bar');
+
+    const items = rawData.filter(i => checked.has(i.id));
+    const prohibited = items.filter(i => i.status === 'Prohibited').length;
+    const caution    = items.filter(i => i.status === 'Caution').length;
+
+    const barIcon  = document.getElementById('barIcon');
+    const barTitle = document.getElementById('barTitle');
+    const barSub   = document.getElementById('barSub');
+
+    if (prohibited > 0) {
+        barIcon.className = 'w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 bg-red-600 text-white';
+        barIcon.innerHTML = '<i data-lucide="ban" class="w-4 h-4"></i>';
+        barTitle.textContent = `⚠️ Prohibited Items in List`;
+    } else if (caution > 0) {
+        barIcon.className = 'w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 bg-amber-500 text-white';
+        barIcon.innerHTML = '<i data-lucide="alert-triangle" class="w-4 h-4"></i>';
+        barTitle.textContent = `${caution} Items Require Declaration`;
+    } else {
+        barIcon.className = 'w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 bg-emerald-600 text-white';
+        barIcon.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i>';
+        barTitle.textContent = 'All Clear ✓';
+    }
+    barSub.textContent = `${checked.size} item${checked.size > 1 ? 's' : ''} in your compliance bag`;
+    lucide.createIcons();
+}
+
+function showMobileSummary() {
+    const modal = document.getElementById('mobileModal');
+    modal.classList.remove('hidden');
+    const items = rawData.filter(i => checked.has(i.id));
+
+    const prohibited = items.filter(i => i.status === 'Prohibited').length;
+    const caution    = items.filter(i => i.status === 'Caution').length;
+    const allowed    = items.filter(i => i.status === 'Allowed').length;
+
+    document.getElementById('modalRiskSummary').innerHTML = `
+        <div class="text-center p-3 bg-emerald-50 rounded-2xl border border-emerald-100">
+            <p class="text-xl font-black text-emerald-700">${allowed}</p>
+            <p class="text-[9px] font-black text-emerald-600 uppercase tracking-widest mt-0.5">Allowed</p>
+        </div>
+        <div class="text-center p-3 bg-amber-50 rounded-2xl border border-amber-100">
+            <p class="text-xl font-black text-amber-700">${caution}</p>
+            <p class="text-[9px] font-black text-amber-600 uppercase tracking-widest mt-0.5">Declare</p>
+        </div>
+        <div class="text-center p-3 bg-red-50 rounded-2xl border border-red-100">
+            <p class="text-xl font-black text-red-700">${prohibited}</p>
+            <p class="text-[9px] font-black text-red-600 uppercase tracking-widest mt-0.5">Banned</p>
+        </div>`;
+
+    document.getElementById('modalList').innerHTML = items.length ? items.map(item => `
+        <div class="p-4 rounded-2xl border-2 ${item.status==='Prohibited'?'border-red-200 bg-red-50':item.status==='Caution'?'border-amber-100 bg-amber-50':'border-emerald-100 bg-emerald-50'}">
+            <div class="flex items-center justify-between gap-2">
+                <p class="font-black text-slate-900 text-sm">${item.name}</p>
+                <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${item.status==='Prohibited'?'bg-red-200 text-red-800':item.status==='Caution'?'bg-amber-200 text-amber-800':'bg-emerald-200 text-emerald-800'}">${item.status}</span>
+            </div>
+            <p class="text-[11px] text-slate-600 mt-1 font-semibold">${item.action}</p>
+        </div>`).join('')
+    : '<p class="text-center text-slate-400 font-semibold text-sm py-8">Your list is empty.<br>Select items on the main menu to track them.</p>';
+
+    lucide.createIcons();
+}
+
+function closeMobileModal() {
+    document.getElementById('mobileModal').classList.add('hidden');
+}
+
+function riskCardClass(r) {
+    return { High: 'card-high', Extreme: 'card-extreme' }[r] || '';
+}
+function riskClass(r) {
+    return { Low: 'risk-low', Medium: 'risk-medium', High: 'risk-high', Extreme: 'risk-extreme' }[r] || 'risk-low';
+}
+function statusClass(s) {
+    return { Allowed: 'status-allowed', Caution: 'status-caution', Prohibited: 'status-prohibited' }[s] || 'status-allowed';
+}
+function statusIcon(s) {
+    return { Allowed: 'check-circle', Caution: 'alert-triangle', Prohibited: 'slash' }[s] || 'help-circle';
+}
+
+function renderList() {
+    const q = state.search;
+    const filtered = rawData.filter(item => {
+        const matchQ = !q || item.name.toLowerCase().includes(q) || item.examples.toLowerCase().includes(q) || item.category.toLowerCase().includes(q);
+        const matchC = state.category === 'All' || item.category === state.category;
+        return matchQ && matchC;
+    });
+
+    document.getElementById('resultCount').innerText = `${filtered.length} Item${filtered.length !== 1 ? 's' : ''}`;
+    const list = document.getElementById('itemList');
+    const empty = document.getElementById('emptyState');
+
+    if (!filtered.length) { 
+        list.innerHTML = ''; 
+        empty.classList.remove('hidden'); 
+        return; 
+    }
+    empty.classList.add('hidden');
+
+    list.innerHTML = filtered.map(item => {
+        const isChecked = checked.has(item.id);
+        return `
+        <div class="border-2 border-slate-100 p-4 md:p-5 rounded-3xl hover:shadow-lg hover:shadow-emerald-900/5 transition-all bg-white ${riskCardClass(item.risk)}">
+            <div class="flex items-start gap-3">
+                <div id="chk-${item.id}" onclick="toggleCheck(${item.id})" class="item-checkbox mt-1 ${isChecked?'checked':''}">
+                    <svg id="chk-icon-${item.id}" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" style="display:${isChecked?'block':'none'}"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex flex-wrap items-center gap-2 mb-1">
+                        <h4 class="font-black text-slate-900 text-sm md:text-base">${item.name}</h4>
+                        <span class="text-[9px] font-black uppercase tracking-widest text-slate-400 bg-slate-50 px-2 py-0.5 rounded">${item.category}</span>
+                    </div>
+                    <p class="text-xs text-slate-500 font-medium mb-3">${item.examples}</p>
+                    <div class="flex flex-wrap items-center gap-2 mb-3">
+                        <span class="text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full ${riskClass(item.risk)}">${item.risk} Risk</span>
+                        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-widest ${statusClass(item.status)}">
+                            <i data-lucide="${statusIcon(item.status)}" class="w-3 h-3"></i>${item.status}
+                        </div>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <div class="flex-1 p-2.5 bg-slate-50 rounded-2xl flex items-start gap-2 border border-slate-100">
+                            <i data-lucide="info" class="w-3.5 h-3.5 text-slate-400 mt-0.5 flex-shrink-0"></i>
+                            <p class="text-[11px] font-semibold text-slate-600 leading-relaxed">${item.notes}</p>
+                        </div>
+                        <div class="sm:w-auto p-2.5 rounded-2xl flex items-start gap-2 border ${item.status==='Allowed'?'bg-emerald-50 border-emerald-100':item.status==='Caution'?'bg-amber-50 border-amber-100':'bg-red-50 border-red-100'}">
+                            <i data-lucide="compass" class="w-3.5 h-3.5 ${item.status==='Allowed'?'text-emerald-500':item.status==='Caution'?'text-amber-500':'text-red-500'} mt-0.5 flex-shrink-0"></i>
+                            <p class="text-[11px] font-black leading-relaxed ${item.status==='Allowed'?'text-emerald-700':item.status==='Caution'?'text-amber-700':'text-red-700'}">${item.action}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+    lucide.createIcons();
+}
+
+function setArrivalType(type) {
+    state.arrivalType = type;
+    document.getElementById('btn-air').className = `px-2.5 py-1 text-[10px] font-black rounded ${type==='air'?'bg-white text-slate-900':'text-white'}`;
+    document.getElementById('btn-land').className = `px-2.5 py-1 text-[10px] font-black rounded ${type==='land'?'bg-white text-slate-900':'text-white'}`;
+    renderLimits();
+    calculateImportTax();
+}
+
+function renderLimits() {
+    const limit = baggageLimits[state.arrivalType];
+    document.getElementById('baggageQuotaText').innerText = `US$ ${limit.toLocaleString()}`;
+    const freeshop = freeshopLimits[state.arrivalType];
+    document.getElementById('freeshopQuotaText').innerText = freeshop === null ? 'N/A' : `US$ ${freeshop.toLocaleString()}`;
+}
+
+function calculateImportTax() {
+    const limit = baggageLimits[state.arrivalType];
+    const inputValue = parseFloat(document.getElementById('calcValue').value) || 0;
+    
+    if (inputValue <= limit) {
+        document.getElementById('declaredTax').innerText = '$0.00';
+        document.getElementById('penaltyTax').innerText = '$0.00';
+    } else {
+        const excess = inputValue - limit;
+        const tax = excess * 0.50;
+        const penalty = tax * 2.0; // 50% basic tax + 50% non-declaration fine (100% of the original tax)
+        
+        document.getElementById('declaredTax').innerText = `$${tax.toFixed(2)}`;
+        document.getElementById('penaltyTax').innerText = `$${penalty.toFixed(2)}`;
+    }
+}
+
+function toggleTask(el) {
+    const icon = el.querySelector('span i');
+    const span = el.querySelector('span');
+    const checked = el.classList.toggle('checked');
+    
+    if (checked) {
+        span.className = "w-5 h-5 rounded border-2 border-emerald-600 bg-emerald-600 flex items-center justify-center flex-shrink-0 transition-colors";
+        icon.classList.remove('hidden');
+    } else {
+        span.className = "w-5 h-5 rounded border-2 border-slate-200 group-hover:border-emerald-500 flex items-center justify-center flex-shrink-0 transition-colors";
+        icon.classList.add('hidden');
+    }
+    
+    const total = document.querySelectorAll('#checklistContainer > div').length;
+    const completed = document.querySelectorAll('#checklistContainer > div.checked').length;
+    document.getElementById('taskProgress').innerText = `${completed} / ${total}`;
+}
+
+function exportPDF() {
+    const options = {
+        margin: [0.5, 0.5],
+        filename: 'Brazil_Customs_Declaration_Support.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    html2pdf().set(options).from(document.getElementById('registry-capture-area')).save();
+}
+
+window.onload = init;
+</script>
+</body>
+</html>
