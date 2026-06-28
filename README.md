@@ -74,6 +74,16 @@ No backend required.
 
 ---
 
+# Preview
+
+## Desktop Experience
+
+! [Compliance Assistant Overview](screenshots/desktop border compliance assistant.png) 
+
+! [Customs Registry](screenshots/desktop customs registry.png)
+
+! [Drone Compliance](screenshots/desktop drone compliance.png)
+
 ## Disclaimer
 
 This application is intended for travel planning purposes only.
